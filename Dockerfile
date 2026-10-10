@@ -10,14 +10,17 @@ COPY . /app
 
 # Ensure plugins directory structure exists and remove legacy Bungee artifacts
 RUN mkdir -p /app/plugins/eaglerxserver && \
-    rm -rf /app/plugins/ViaBungee.jar /app/plugins/ViaVersion /app/plugins/ViaBackwards.jar /app/Waterfall.jar
+    rm -rf /app/plugins/ViaBungee.jar /app/plugins/ViaVersion /app/Waterfall.jar
 
 # Download active Velocity core
 RUN curl -fsSL -o /app/velocity.jar "https://mineacademy.org/api/velocity/latest"
 
-# Download native ViaVersion for Velocity from Modrinth
+# Download native ViaVersion & ViaBackwards for Velocity from Modrinth
 RUN VIA_URL=$(curl -sL "https://api.modrinth.com/v2/project/viaversion/version" | jq -r '.[0].files[0].url') && \
     curl -fsSL -o /app/plugins/ViaVersion.jar "$VIA_URL"
+
+RUN VIAB_URL=$(curl -sL "https://api.modrinth.com/v2/project/viabackwards/version" | jq -r '.[0].files[0].url') && \
+    curl -fsSL -o /app/plugins/ViaBackwards.jar "$VIAB_URL"
 
 # Generate start.sh for Velocity
 RUN echo '#!/bin/bash' > /app/start.sh && \
