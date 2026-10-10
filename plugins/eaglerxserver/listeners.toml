@@ -2,12 +2,12 @@
 listener_name = "listener0"
 inject_address = "0.0.0.0:25577"
 websocket_address = ""
-forward_ip = true
+forward_ip = false
 forward_ip_header = "X-Forwarded-For"
 forward_secret = false
 forward_secret_header = "X-Eagler-Secret"
 forward_secret_file = "eagler_forwarding.secret"
-spoof_player_address_forwarded = true
+spoof_player_address_forwarded = false
 dual_stack_haproxy_detection = false
 force_disable_haproxy = false
 
