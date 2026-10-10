@@ -5,28 +5,26 @@ WORKDIR /app
 # Install bash, curl, jq
 RUN apk add --no-cache curl bash jq
 
-# Download official BungeeCord core
-RUN curl -fsSL -o Waterfall.jar "https://ci.md-5.net/job/BungeeCord/lastSuccessfulBuild/artifact/bootstrap/target/BungeeCord.jar"
-
-# Copy configurations
+# Copy repository configurations
 COPY . /app
 
-# Clean any Bukkit jars directly in plugins folder
-RUN mkdir -p /app/plugins /app/plugins/ViaVersion && \
-    rm -f /app/plugins/ViaVersion.jar /app/plugins/ViaBackwards.jar
+# Ensure plugins directory exists and clean out legacy Bungee-specific jars
+RUN mkdir -p /app/plugins && \
+    rm -rf /app/plugins/ViaBungee.jar /app/plugins/ViaVersion /app/plugins/ViaBackwards.jar /app/Waterfall.jar
 
-# 1. Download official ViaBungee loader to /app/plugins/
-RUN VIABUNGEE_URL=$(curl -sL https://api.github.com/repos/ViaVersion/ViaBungee/releases/latest | jq -r '.assets[] | select(.name | endswith(".jar")) | .browser_download_url' | head -n 1) && \
-    curl -fsSL -o /app/plugins/ViaBungee.jar "$VIABUNGEE_URL"
+# Download latest Velocity core from PaperMC
+RUN VELO_VER=$(curl -sL "https://api.papermc.io/v2/projects/velocity" | jq -r '.versions[-1]') && \
+    VELO_BUILD=$(curl -sL "https://api.papermc.io/v2/projects/velocity/versions/${VELO_VER}" | jq -r '.builds[-1]') && \
+    curl -fsSL -o /app/velocity.jar "https://api.papermc.io/v2/projects/velocity/versions/${VELO_VER}/builds/${VELO_BUILD}/downloads/velocity-${VELO_VER}-${VELO_BUILD}.jar"
 
-# 2. Download core ViaVersion into /app/plugins/ViaVersion/
+# Download native ViaVersion for Velocity from Modrinth
 RUN VIA_URL=$(curl -sL "https://api.modrinth.com/v2/project/viaversion/version" | jq -r '.[0].files[0].url') && \
-    curl -fsSL -o /app/plugins/ViaVersion/ViaVersion.jar "$VIA_URL"
+    curl -fsSL -o /app/plugins/ViaVersion.jar "$VIA_URL"
 
-# Create start.sh
+# Generate start.sh for Velocity
 RUN echo '#!/bin/bash' > /app/start.sh && \
-    echo 'echo "Starting Eaglercraft Gateway Proxy..."' >> /app/start.sh && \
-    echo 'exec java -Xms256M -Xmx512M -jar /app/Waterfall.jar' >> /app/start.sh && \
+    echo 'echo "Starting Velocity Eaglercraft Gateway..."' >> /app/start.sh && \
+    echo 'exec java -Xms256M -Xmx512M -XX:+UseG1GC -jar /app/velocity.jar' >> /app/start.sh && \
     chmod +x /app/start.sh
 
 EXPOSE 25577
