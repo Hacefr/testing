@@ -11,12 +11,17 @@ RUN curl -fsSL -o Waterfall.jar "https://ci.md-5.net/job/BungeeCord/lastSuccessf
 # Copy configurations
 COPY . /app
 
-# Ensure plugins directory exists and clean out any broken jars
-RUN mkdir -p /app/plugins && rm -f /app/plugins/ViaBackwards.jar
+# Clean any Bukkit jars directly in plugins folder
+RUN mkdir -p /app/plugins /app/plugins/ViaVersion && \
+    rm -f /app/plugins/ViaVersion.jar /app/plugins/ViaBackwards.jar
 
-# Download real latest ViaVersion from Modrinth (no rate limits, supports BungeeCord)
+# 1. Download official ViaBungee loader to /app/plugins/
+RUN VIABUNGEE_URL=$(curl -sL https://api.github.com/repos/ViaVersion/ViaBungee/releases/latest | jq -r '.assets[] | select(.name | endswith(".jar")) | .browser_download_url' | head -n 1) && \
+    curl -fsSL -o /app/plugins/ViaBungee.jar "$VIABUNGEE_URL"
+
+# 2. Download core ViaVersion into /app/plugins/ViaVersion/
 RUN VIA_URL=$(curl -sL "https://api.modrinth.com/v2/project/viaversion/version" | jq -r '.[0].files[0].url') && \
-    curl -fsSL -o /app/plugins/ViaVersion.jar "$VIA_URL"
+    curl -fsSL -o /app/plugins/ViaVersion/ViaVersion.jar "$VIA_URL"
 
 # Create start.sh
 RUN echo '#!/bin/bash' > /app/start.sh && \
