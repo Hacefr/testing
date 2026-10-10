@@ -6,7 +6,7 @@ online-mode = false
 prevent-client-proxy-connections = false
 
 player-info-forwarding-mode = "none"
-forwarding-secret-file = ""
+forwarding-secret-file = "forwarding.secret"
 
 [servers]
 shockbyte = "157.85.94.60:20929"
