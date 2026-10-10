@@ -1,4 +1,4 @@
-FROM eclipse-temurin:17-jre-alpine
+FROM eclipse-temurin:21-jre-alpine
 
 WORKDIR /app
 
@@ -8,12 +8,12 @@ RUN apk add --no-cache curl bash jq
 # Copy repository configurations
 COPY . /app
 
-# Ensure plugins directory exists and clean out legacy Bungee-specific jars
+# Ensure plugins directory exists and clean out legacy Bungee jars
 RUN mkdir -p /app/plugins && \
     rm -rf /app/plugins/ViaBungee.jar /app/plugins/ViaVersion /app/plugins/ViaBackwards.jar /app/Waterfall.jar
 
-# Download latest stable Velocity core
-RUN curl -fsSL -o /app/velocity.jar "https://mineacademy.org/api/velocity/latest"
+# Download stable Velocity from PaperMC builds
+RUN curl -fsSL -o /app/velocity.jar "https://api.papermc.io/v2/projects/velocity/versions/3.3.0-SNAPSHOT/builds/442/downloads/velocity-3.3.0-SNAPSHOT-442.jar"
 
 # Download native ViaVersion for Velocity from Modrinth
 RUN VIA_URL=$(curl -sL "https://api.modrinth.com/v2/project/viaversion/version" | jq -r '.[0].files[0].url') && \
