@@ -1,4 +1,4 @@
-FROM eclipse-temurin:21-jre-alpine
+FROM eclipse-temurin:25-jre-alpine
 
 WORKDIR /app
 
@@ -8,15 +8,14 @@ RUN apk add --no-cache curl bash jq
 # Copy repository configurations
 COPY . /app
 
-# Ensure plugins directory exists and clean out legacy Bungee jars
+# Ensure plugins directory exists and clean legacy Bungee jars
 RUN mkdir -p /app/plugins && \
     rm -rf /app/plugins/ViaBungee.jar /app/plugins/ViaVersion /app/plugins/ViaBackwards.jar /app/Waterfall.jar
 
-# Download the latest active Velocity build dynamically from PaperMC
+# Download active Velocity release dynamically using PaperMC v2 API
 RUN VER=$(curl -sL -H "User-Agent: EaglercraftGateway/1.0" "https://api.papermc.io/v2/projects/velocity" | jq -r '.versions[-1]') && \
-    BUILD_DATA=$(curl -sL -H "User-Agent: EaglercraftGateway/1.0" "https://api.papermc.io/v2/projects/velocity/versions/${VER}/builds" | jq -r '.builds[-1]') && \
-    BUILD_NUM=$(echo "$BUILD_DATA" | jq -r '.build') && \
-    JAR_NAME=$(echo "$BUILD_DATA" | jq -r '.downloads.application.name') && \
+    BUILD_NUM=$(curl -sL -H "User-Agent: EaglercraftGateway/1.0" "https://api.papermc.io/v2/projects/velocity/versions/${VER}/builds" | jq -r '.builds[-1]') && \
+    JAR_NAME=$(curl -sL -H "User-Agent: EaglercraftGateway/1.0" "https://api.papermc.io/v2/projects/velocity/versions/${VER}/builds/${BUILD_NUM}" | jq -r '.downloads.application.name') && \
     curl -fsSL -H "User-Agent: EaglercraftGateway/1.0" -o /app/velocity.jar "https://api.papermc.io/v2/projects/velocity/versions/${VER}/builds/${BUILD_NUM}/downloads/${JAR_NAME}"
 
 # Download native ViaVersion for Velocity from Modrinth
