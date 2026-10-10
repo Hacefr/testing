@@ -12,10 +12,8 @@ COPY . /app
 RUN mkdir -p /app/plugins && \
     rm -rf /app/plugins/ViaBungee.jar /app/plugins/ViaVersion /app/plugins/ViaBackwards.jar /app/Waterfall.jar
 
-# Download latest Velocity core from PaperMC
-RUN VELO_VER=$(curl -sL "https://api.papermc.io/v2/projects/velocity" | jq -r '.versions[-1]') && \
-    VELO_BUILD=$(curl -sL "https://api.papermc.io/v2/projects/velocity/versions/${VELO_VER}" | jq -r '.builds[-1]') && \
-    curl -fsSL -o /app/velocity.jar "https://api.papermc.io/v2/projects/velocity/versions/${VELO_VER}/builds/${VELO_BUILD}/downloads/velocity-${VELO_VER}-${VELO_BUILD}.jar"
+# Download latest stable Velocity core
+RUN curl -fsSL -o /app/velocity.jar "https://mineacademy.org/api/velocity/latest"
 
 # Download native ViaVersion for Velocity from Modrinth
 RUN VIA_URL=$(curl -sL "https://api.modrinth.com/v2/project/viaversion/version" | jq -r '.[0].files[0].url') && \
