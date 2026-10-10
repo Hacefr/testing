@@ -12,8 +12,12 @@ COPY . /app
 RUN mkdir -p /app/plugins && \
     rm -rf /app/plugins/ViaBungee.jar /app/plugins/ViaVersion /app/plugins/ViaBackwards.jar /app/Waterfall.jar
 
-# Download stable Velocity from PaperMC builds
-RUN curl -fsSL -o /app/velocity.jar "https://api.papermc.io/v2/projects/velocity/versions/3.3.0-SNAPSHOT/builds/442/downloads/velocity-3.3.0-SNAPSHOT-442.jar"
+# Download the latest active Velocity build dynamically from PaperMC
+RUN VER=$(curl -sL -H "User-Agent: EaglercraftGateway/1.0" "https://api.papermc.io/v2/projects/velocity" | jq -r '.versions[-1]') && \
+    BUILD_DATA=$(curl -sL -H "User-Agent: EaglercraftGateway/1.0" "https://api.papermc.io/v2/projects/velocity/versions/${VER}/builds" | jq -r '.builds[-1]') && \
+    BUILD_NUM=$(echo "$BUILD_DATA" | jq -r '.build') && \
+    JAR_NAME=$(echo "$BUILD_DATA" | jq -r '.downloads.application.name') && \
+    curl -fsSL -H "User-Agent: EaglercraftGateway/1.0" -o /app/velocity.jar "https://api.papermc.io/v2/projects/velocity/versions/${VER}/builds/${BUILD_NUM}/downloads/${JAR_NAME}"
 
 # Download native ViaVersion for Velocity from Modrinth
 RUN VIA_URL=$(curl -sL "https://api.modrinth.com/v2/project/viaversion/version" | jq -r '.[0].files[0].url') && \
