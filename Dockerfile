@@ -1,4 +1,4 @@
-FROM eclipse-temurin:21-jre-alpine
+FROM eclipse-temurin:25-jre-alpine
 
 WORKDIR /app
 
@@ -12,9 +12,8 @@ COPY . /app
 RUN mkdir -p /app/plugins && \
     rm -rf /app/plugins/ViaBungee.jar /app/plugins/ViaVersion /app/plugins/ViaBackwards.jar /app/Waterfall.jar
 
-# Download stable Velocity from PaperMC GitHub Releases mirror
-RUN VELO_URL=$(curl -sL https://api.github.com/repos/PaperMC/Velocity/releases/latest | jq -r '.assets[] | select(.name | endswith(".jar")) | .browser_download_url' | head -n 1) && \
-    curl -fsSL -o /app/velocity.jar "$VELO_URL"
+# Download active Velocity core directly
+RUN curl -fsSL -o /app/velocity.jar "https://mineacademy.org/api/velocity/latest"
 
 # Download native ViaVersion for Velocity from Modrinth
 RUN VIA_URL=$(curl -sL "https://api.modrinth.com/v2/project/viaversion/version" | jq -r '.[0].files[0].url') && \
