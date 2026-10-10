@@ -5,14 +5,14 @@ WORKDIR /app
 # Install bash, curl, jq
 RUN apk add --no-cache curl bash jq
 
-# Copy repository configurations
+# Copy configurations
 COPY . /app
 
-# Ensure plugins directory exists and clean legacy Bungee jars
-RUN mkdir -p /app/plugins && \
+# Ensure plugins directory structure exists and remove legacy Bungee artifacts
+RUN mkdir -p /app/plugins/eaglerxserver && \
     rm -rf /app/plugins/ViaBungee.jar /app/plugins/ViaVersion /app/plugins/ViaBackwards.jar /app/Waterfall.jar
 
-# Download active Velocity core directly
+# Download active Velocity core
 RUN curl -fsSL -o /app/velocity.jar "https://mineacademy.org/api/velocity/latest"
 
 # Download native ViaVersion for Velocity from Modrinth
