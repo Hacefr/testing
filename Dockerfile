@@ -1,4 +1,4 @@
-FROM eclipse-temurin:25-jre-alpine
+FROM eclipse-temurin:21-jre-alpine
 
 WORKDIR /app
 
@@ -12,8 +12,9 @@ COPY . /app
 RUN mkdir -p /app/plugins && \
     rm -rf /app/plugins/ViaBungee.jar /app/plugins/ViaVersion /app/plugins/ViaBackwards.jar /app/Waterfall.jar
 
-# Download official stable Velocity 4.2.0 (Build 30) directly from PaperMC
-RUN curl -fsSL -H "User-Agent: EaglercraftGateway/1.0" -o /app/velocity.jar "https://api.papermc.io/v2/projects/velocity/versions/4.2.0/builds/30/downloads/velocity-4.2.0-30.jar"
+# Download stable Velocity from PaperMC GitHub Releases mirror
+RUN VELO_URL=$(curl -sL https://api.github.com/repos/PaperMC/Velocity/releases/latest | jq -r '.assets[] | select(.name | endswith(".jar")) | .browser_download_url' | head -n 1) && \
+    curl -fsSL -o /app/velocity.jar "$VELO_URL"
 
 # Download native ViaVersion for Velocity from Modrinth
 RUN VIA_URL=$(curl -sL "https://api.modrinth.com/v2/project/viaversion/version" | jq -r '.[0].files[0].url') && \
